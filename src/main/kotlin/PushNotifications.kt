@@ -1,5 +1,6 @@
 package com.pusher
 
+import com.google.gson.Gson
 import com.google.gson.JsonArray
 import java.io.IOException
 import java.net.URISyntaxException
@@ -10,6 +11,7 @@ import org.apache.http.impl.client.HttpClients
 
 class PushNotifications(private val instanceId: String, private val secretKey: String) {
 
+    private val gson = Gson()
     private val interestsMaxLength = 164
     private val baseURL = "https://$instanceId.pushnotifications.pusher.com/publish_api/v1"
 
@@ -24,15 +26,16 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
     }
 
     @Throws(IOException::class, InterruptedException::class, URISyntaxException::class)
-    fun publish(interests: List<String>, publishRequest: String) {
+    fun publish(interests: List<String>, publishRequest: Map<String, Any>) {
         this.validateInput(interests)
+
+        val publishRequestWithInterests = publishRequest.toMutableMap()
+        publishRequestWithInterests.put("interests", interests)
 
         val client = HttpClients.createDefault()
         val url = String.format("$baseURL/instances/%s/publishes", this.instanceId)
         val httpPost = HttpPost(url)
-        val interestsString = this.interestsAsString(interests)
-        val json = StringEntity("{ \"interests\": $interestsString, $publishRequest }")
-        httpPost.setEntity(json)
+        httpPost.setEntity(StringEntity(gson.toJson(publishRequestWithInterests)))
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-Type", "application/json")
         httpPost.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
@@ -40,19 +43,13 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         System.out.println(response)
     }
 
-    private fun interestsAsString(interests: List<String>): String {
-        var jsonArray = JsonArray()
-        interests.forEach { interest -> jsonArray.add(interest) }
-        return jsonArray.toString()
-    }
-
     private fun validateInput(interests: List<String>) {
         if (interests.isEmpty()) {
             throw IllegalArgumentException("Publish method expects at least one interest")
         }
 
-        interests.asSequence()
-                .filter { it.length > interestsMaxLength }
-                .forEach { throw IllegalArgumentException(String.format("interest %s is longer than the maximum of %d characters", it, interestsMaxLength)) }
+        interests.find { it.length > interestsMaxLength }?.let {
+            throw IllegalArgumentException(String.format("interest %s is longer than the maximum of %d characters", it, interestsMaxLength))
+        }
     }
 }
