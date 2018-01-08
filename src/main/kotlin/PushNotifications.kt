@@ -10,7 +10,8 @@ import java.net.URISyntaxException
 
 class PushNotifications(private val instanceId: String, private val secretKey: String) {
 
-    private var interestsMaxLength = 164
+    private val interestsMaxLength = 164
+    private val baseURL = "https://$instanceId.pushnotifications.pusher.com/publish_api/v1"
 
     init {
         if (instanceId.isEmpty()) {
@@ -33,7 +34,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         }
 
         val client = HttpClient.newHttpClient()
-        val url = String.format("http://%s.pushnotifications.pusher.com/publish_api/v1/instances/%s/publishes", this.instanceId, this.instanceId)
+        val url = String.format("$baseURL/instances/%s/publishes", this.instanceId)
 
         val request = HttpRequest.newBuilder()
                 .uri(URI(url))
