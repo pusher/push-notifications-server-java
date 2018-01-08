@@ -1,5 +1,6 @@
 package com.pusher
 
+import com.google.gson.JsonArray
 import java.io.IOException
 import java.net.URISyntaxException
 import org.apache.http.client.methods.HttpPost
@@ -23,24 +24,35 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
     }
 
     @Throws(IOException::class, InterruptedException::class, URISyntaxException::class)
-    fun publish(payload: String) {
-        if (payload.isEmpty()) {
-            throw IllegalArgumentException("payload should not be an empty string")
-        }
+    fun publish(interests: List<String>, publishRequest: String) {
+        this.validateInput(interests)
 
-        if (payload.length > interestsMaxLength) {
-            throw IllegalArgumentException(String.format("interest %s is longer than the maximum of %d characters", payload, interestsMaxLength))
-        }
-
-        var client = HttpClients.createDefault()
+        val client = HttpClients.createDefault()
         val url = String.format("$baseURL/instances/%s/publishes", this.instanceId)
-        var httpPost = HttpPost(url)
-        val json = StringEntity("{ \"interests\": [\"donuts\"], \"apns\": { \"aps\": { \"alert\": \"Hi\" }}}")
+        val httpPost = HttpPost(url)
+        val interestsString = this.interestsAsString(interests)
+        val json = StringEntity("{ \"interests\": $interestsString, $publishRequest }")
         httpPost.setEntity(json)
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-Type", "application/json")
         httpPost.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
-        var response = client.execute(httpPost)
+        val response = client.execute(httpPost)
         System.out.println(response)
+    }
+
+    fun interestsAsString(interests: List<String>): String {
+        var jsonArray = JsonArray()
+        interests.forEach { interest -> jsonArray.add(interest) }
+        return jsonArray.toString()
+    }
+
+    fun validateInput(interests: List<String>) {
+        if (interests.isEmpty()) {
+            throw IllegalArgumentException("Publish method expects at least one interest")
+        }
+
+        interests.asSequence()
+                .filter { it.length > interestsMaxLength }
+                .forEach { throw IllegalArgumentException(String.format("interest %s is longer than the maximum of %d characters", it, interestsMaxLength)) }
     }
 }
