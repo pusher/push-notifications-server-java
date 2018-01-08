@@ -13,6 +13,12 @@ class PusherAuthError(val errorMessage: String): RuntimeException()
 data class PublishNotificationResponse(val publishId: String)
 data class PushNotificationErrorResponse(val error: String, val description: String)
 
+/**
+ * Push Notifications class implements publish method
+ * that is used to publish push notifications to specified interests.
+ * @author www.pusher.com
+ * @version 0.0.1
+ */
 class PushNotifications(private val instanceId: String, private val secretKey: String) {
     private val gson = Gson()
     private val interestsMaxLength = 164
@@ -28,6 +34,13 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         }
     }
 
+    /**
+     * Publish the given publish_body to the specified interests.
+     *
+     * @param  interests List of interests that the publish body should be sent to.
+     * @param  publishRequest Map containing the body of the push notification publish request.
+     * @return publishId
+     */
     @Throws(IOException::class, InterruptedException::class, URISyntaxException::class)
     fun publish(interests: List<String>, publishRequest: Map<String, Any>): String {
         this.validateInterests(interests)
