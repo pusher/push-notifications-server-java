@@ -1,12 +1,11 @@
 package com.pusher
 
-import jdk.incubator.http.HttpClient
-import jdk.incubator.http.HttpRequest
-import jdk.incubator.http.HttpResponse
-
 import java.io.IOException
-import java.net.URI
 import java.net.URISyntaxException
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.HttpClients
+
 
 class PushNotifications(private val instanceId: String, private val secretKey: String) {
 
@@ -33,18 +32,15 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
             throw IllegalArgumentException(String.format("interest %s is longer than the maximum of %d characters", payload, interestsMaxLength))
         }
 
-        val client = HttpClient.newHttpClient()
+        var client = HttpClients.createDefault()
         val url = String.format("$baseURL/instances/%s/publishes", this.instanceId)
-
-        val request = HttpRequest.newBuilder()
-                .uri(URI(url))
-                .setHeader("Accept", "application/json")
-                .setHeader("Content-Type", "application/json")
-                .setHeader("Authorization", String.format("Bearer %s", this.secretKey))
-                .POST(HttpRequest.BodyProcessor.fromString(payload))
-                .build()
-
-        val response = client.send(request, HttpResponse.BodyHandler.discard<String>(null))
-        System.out.printf("Received HTTP Response Code: %d%n", response.statusCode())
+        var httpPost = HttpPost(url)
+        val json = StringEntity("{ \"interests\": [\"donuts\"], \"apns\": { \"aps\": { \"alert\": \"Hi\" }}}")
+        httpPost.setEntity(json)
+        httpPost.setHeader("Accept", "application/json")
+        httpPost.setHeader("Content-Type", "application/json")
+        httpPost.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
+        var response = client.execute(httpPost)
+        System.out.println(response)
     }
 }
