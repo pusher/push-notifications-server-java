@@ -9,8 +9,6 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.client.BasicResponseHandler
 
-
-
 class PusherAuthError(val errorMessage: String): RuntimeException()
 data class PublishNotificationResponse(val publishId: String)
 data class PushNotificationErrorResponse(val error: String, val description: String)
