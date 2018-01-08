@@ -40,13 +40,13 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         System.out.println(response)
     }
 
-    fun interestsAsString(interests: List<String>): String {
+    private fun interestsAsString(interests: List<String>): String {
         var jsonArray = JsonArray()
         interests.forEach { interest -> jsonArray.add(interest) }
         return jsonArray.toString()
     }
 
-    fun validateInput(interests: List<String>) {
+    private fun validateInput(interests: List<String>) {
         if (interests.isEmpty()) {
             throw IllegalArgumentException("Publish method expects at least one interest")
         }
