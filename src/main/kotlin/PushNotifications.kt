@@ -82,7 +82,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         }
 
         interests.find { it.length > interestsMaxLength }?.let {
-            throw IllegalArgumentException(String.format("interest %s is longer than the maximum of %d characters", it, interestsMaxLength))
+            throw IllegalArgumentException("interest $it is longer than the maximum of $interestsMaxLength characters")
         }
     }
 }
