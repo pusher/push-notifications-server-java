@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.client.BasicResponseHandler
+import org.apache.http.util.EntityUtils
 
 class PusherAuthError(val errorMessage: String): RuntimeException()
 data class PublishNotificationResponse(val publishId: String)
@@ -57,23 +58,21 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         httpPost.setHeader("Content-Type", "application/json")
         httpPost.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
         val response = client.execute(httpPost)
-
+        val entityContent = EntityUtils.toString(response.entity, "UTF-8")
         val statusCode = response.statusLine.statusCode
 
         when (statusCode) {
-            401 -> pusherError(response)
-            404 -> pusherError(response)
-            in 400..499 -> pusherError(response)
-            in 500..599 -> pusherError(response)
+            401 -> pusherError(entityContent)
+            404 -> pusherError(entityContent)
+            in 400..499 -> pusherError(entityContent)
+            in 500..599 -> pusherError(entityContent)
         }
 
-        val responseString = BasicResponseHandler().handleResponse(response)
-
-        return gson.fromJson(responseString, PublishNotificationResponse::class.java).publishId
+        return gson.fromJson(entityContent, PublishNotificationResponse::class.java).publishId
     }
 
-    private fun pusherError(response: CloseableHttpResponse): PusherAuthError {
-        throw PusherAuthError(gson.fromJson(response.toString(), PushNotificationErrorResponse::class.java).description)
+    private fun pusherError(entityContent: String): PusherAuthError {
+        throw PusherAuthError(gson.fromJson(entityContent, PushNotificationErrorResponse::class.java).description)
     }
 
     private fun validateInterests(interests: List<String>) {
