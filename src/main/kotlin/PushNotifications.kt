@@ -49,7 +49,6 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         val publishRequestWithInterests = publishRequest.toMutableMap()
         publishRequestWithInterests.put("interests", interests)
 
-        System.out.println(gson.toJson(publishRequestWithInterests))
         val client = HttpClients.createDefault()
         val url = String.format("$baseURL/instances/%s/publishes", this.instanceId)
         val httpPost = HttpPost(url)
