@@ -3,7 +3,7 @@ package com.pusher
 import java.io.IOException
 import java.net.URISyntaxException
 
-object Main {
+object MainKotlin {
 
     @JvmStatic
     fun main(args: Array<String>) {
