@@ -1,13 +1,11 @@
 package com.pusher
 
 import com.google.gson.Gson
-import org.apache.http.client.methods.CloseableHttpResponse
 import java.io.IOException
 import java.net.URISyntaxException
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
-import org.apache.http.impl.client.BasicResponseHandler
 import org.apache.http.util.EntityUtils
 
 class PusherAuthError(val errorMessage: String): RuntimeException()
