@@ -41,3 +41,12 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+sourceSets.main {
+    java {
+        exclude "**/com/pusher/pushnotifications/MainJava.java"
+    }
+    kotlin {
+        exclude "**/com/pusher/pushnotifications/MainKotlin.kt"
+    }
+}
