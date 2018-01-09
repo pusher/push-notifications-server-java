@@ -1,4 +1,4 @@
-import com.pusher.PushNotifications;
+package com.pusher.pushnotifications;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
