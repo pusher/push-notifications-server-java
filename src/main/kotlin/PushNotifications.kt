@@ -16,7 +16,10 @@ data class PushNotificationErrorResponse(val error: String, val description: Str
  * Push Notifications class implements publish method
  * that is used to publish push notifications to specified interests.
  * @author www.pusher.com
- * @version 0.0.1
+ * @version 0.9.0
+ *
+ * @param instanceId the id of the instance
+ * @param secretKey the secret key for the instance
  */
 class PushNotifications(private val instanceId: String, private val secretKey: String) {
     private val gson = Gson()
