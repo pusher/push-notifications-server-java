@@ -9,6 +9,9 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 
 class PusherAuthError(val errorMessage: String): RuntimeException()
+class PusherMissingInstanceError(val errorMessage: String): RuntimeException()
+class PusherValidationError(val errorMessage: String): RuntimeException()
+class PusherServerError(val errorMessage: String): RuntimeException()
 data class PublishNotificationResponse(val publishId: String)
 data class PushNotificationErrorResponse(val error: String, val description: String)
 
@@ -51,29 +54,28 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         publishRequestWithInterests.put("interests", interests)
 
         val client = HttpClients.createDefault()
-        val url = String.format("$baseURL/instances/%s/publishes", this.instanceId)
-        val httpPost = HttpPost(url)
+        val httpPost = HttpPost("$baseURL/instances/$instanceId/publishes")
         httpPost.setEntity(StringEntity(gson.toJson(publishRequestWithInterests)))
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-Type", "application/json")
         httpPost.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
         val response = client.execute(httpPost)
-        val entityContent = EntityUtils.toString(response.entity, "UTF-8")
+        val responseBody = EntityUtils.toString(response.entity, "UTF-8")
         val statusCode = response.statusLine.statusCode
 
         when (statusCode) {
-            401 -> pusherError(entityContent)
-            404 -> pusherError(entityContent)
-            in 400..499 -> pusherError(entityContent)
-            in 500..599 -> pusherError(entityContent)
+            401 -> throw PusherAuthError(extractErrorDescription(responseBody))
+            404 -> throw PusherMissingInstanceError(extractErrorDescription(responseBody))
+            in 400..499 -> throw PusherValidationError(extractErrorDescription(responseBody))
+            in 500..599 -> throw PusherServerError(extractErrorDescription(responseBody))
+            else -> {
+               return gson.fromJson(responseBody, PublishNotificationResponse::class.java).publishId
+            }
         }
-
-        return gson.fromJson(entityContent, PublishNotificationResponse::class.java).publishId
     }
 
-    private fun pusherError(entityContent: String): PusherAuthError {
-        throw PusherAuthError(gson.fromJson(entityContent, PushNotificationErrorResponse::class.java).description)
-    }
+    private fun extractErrorDescription(responseBody: String): String =
+            gson.fromJson(responseBody, PushNotificationErrorResponse::class.java).description
 
     private fun validateInterests(interests: List<String>) {
         if (interests.isEmpty()) {
