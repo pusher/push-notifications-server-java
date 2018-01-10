@@ -28,7 +28,7 @@ dependencies {
 
 ### Download
 
-You can download a version of the `.jar` directly from <http://repo1.maven.org/maven2/com/pusher/push-notifications-server-java/>
+You can download a version of the `.jar` directly from [Maven](http://repo1.maven.org/maven2/com/pusher/push-notifications-server-java/).
 
 ## Usage
 ### Configuring the SDK for Your Instance
