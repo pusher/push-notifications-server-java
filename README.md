@@ -1,5 +1,35 @@
 # Push Notifications Java SDK
 
+## Installation
+
+The compiled library is available in two ways:
+
+### Maven
+
+The push-notifications-server-java is available in Maven Central.
+
+```xml
+<dependencies>
+    <dependency>
+      <groupId>com.pusher</groupId>
+      <artifactId>push-notifications-server-java</artifactId>
+      <version>0.9.0</version>
+    </dependency>
+</dependencies>
+```
+
+### Gradle
+
+```groovy
+dependencies {
+  compile 'com.pusher:push-notifications-server-java:0.9.0'
+}
+```
+
+### Download
+
+You can download a version of the `.jar` directly from [Maven](http://repo1.maven.org/maven2/com/pusher/push-notifications-server-java/).
+
 ## Usage
 ### Configuring the SDK for Your Instance
 
