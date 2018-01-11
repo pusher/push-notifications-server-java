@@ -1,5 +1,7 @@
 # Push Notifications Java SDK
 
+[![Build Status](https://travis-ci.org/pusher/push-notifications-server-java.svg?branch=master)](https://travis-ci.org/pusher/push-notifications-server-java)
+
 ## Installation
 
 The compiled library is available in two ways:
