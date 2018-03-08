@@ -71,11 +71,19 @@ Once you have created your PushNotifications instance you can publish a push not
 List<String> interests = Arrays.asList("donuts", "pizza");
 
 Map<String, Map> publishRequest = new HashMap();
+
 Map<String, String> alert = new HashMap();
 alert.put("alert", "hi");
 Map<String, Map> aps = new HashMap();
 aps.put("aps", alert);
 publishRequest.put("apns", aps);
+
+Map<String, String> fcmNotification = new HashMap();
+fcmNotification.put("title", "hello");
+fcmNotification.put("body", "Hello world");
+Map<String, Map> fcm = new HashMap();
+fcm.put("notification", fcmNotification);
+publishRequest.put("fcm", fcm);
 
 pushNotifications.publish(interests, publishRequest);
 ```
@@ -87,8 +95,11 @@ pushNotifications.publish(interests, publishRequest);
 <p>
 
 ```kotlin
-var interests = listOf("donuts", "pizza")
-val publishRequest = hashMapOf("apns" to hashMapOf("aps" to hashMapOf("alert" to "hi")))
+val interests = listOf("donuts", "pizza")
+val publishRequest = hashMapOf(
+  "apns" to hashMapOf("aps" to hashMapOf("alert" to "hi")),
+  "fcm" to hashMapOf("notification" to hashMapOf("title" to "hello", "body" to "Hello world"))
+)
 
 pn.publish(interests, publishRequest)
 ```
