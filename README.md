@@ -1,4 +1,4 @@
-# Push Notifications Java SDK
+# Beams Java Server SDK
 
 [![Build Status](https://travis-ci.org/pusher/push-notifications-server-java.svg?branch=master)](https://travis-ci.org/pusher/push-notifications-server-java)
 
@@ -35,7 +35,7 @@ You can download a version of the `.jar` directly from [Maven](http://repo1.mave
 ## Usage
 ### Configuring the SDK for Your Instance
 
-Use your instance id and secret (you can get these from the [dashboard](https://dash.pusher.com)) to create a PushNotifications instance:
+Use your instance id and secret (you can get these from the [dashboard](https://dash.pusher.com/beams)) to create a Beams PushNotifications instance:
 <details><summary>Java</summary>
 <p>
 
