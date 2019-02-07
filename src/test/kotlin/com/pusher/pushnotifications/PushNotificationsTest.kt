@@ -41,6 +41,15 @@ class PushNotificationsTest {
         assertTrue((token["token"] as String).length > 200)
     }
 
+    @Test
+    fun `generateToken should generate a token based on a 248 bit key`() {
+        val beamsWithSmallerKey = PushNotifications(validInstanceId, "F7D28BD68A9DB989ADF6EB19F89B3DB")
+        val token = beamsWithSmallerKey.generateToken("user123")
+
+        assertThat(token["token"], `is`(notNullValue()))
+        assertTrue((token["token"] as String).length > 200)
+    }
+
     // publishToInterests
 
     @Test(expected = IllegalArgumentException::class)

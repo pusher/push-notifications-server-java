@@ -1,8 +1,7 @@
 package com.pusher.pushnotifications
 
+import com.auth0.jwt.algorithms.Algorithm
 import com.google.gson.Gson
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import org.apache.http.client.methods.HttpDelete
 import java.io.IOException
 import java.net.URISyntaxException
@@ -14,7 +13,7 @@ import java.net.URLEncoder
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
-import javax.crypto.spec.SecretKeySpec
+import com.auth0.jwt.JWT
 
 class PusherAuthError(val errorMessage: String): RuntimeException()
 class PusherTooManyRequestsError(val errorMessage: String): RuntimeException()
@@ -67,12 +66,11 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         val iss = "https://$instanceId.pushnotifications.pusher.com"
         val exp = LocalDateTime.now().plusDays(1)
 
-        val token = Jwts.builder()
-                .setSubject(userId)
-                .setIssuer(iss)
-                .setExpiration(Date.from(exp.toInstant(ZoneOffset.UTC)))
-                .signWith(SecretKeySpec(secretKey.toByteArray(), SignatureAlgorithm.HS256.jcaName))
-                .compact()
+        val token = JWT.create()
+                .withSubject(userId)
+                .withIssuer(iss)
+                .withExpiresAt(Date.from(exp.toInstant(ZoneOffset.UTC)))
+                .sign(Algorithm.HMAC256(secretKey))
 
         return mapOf("token" to token)
     }
