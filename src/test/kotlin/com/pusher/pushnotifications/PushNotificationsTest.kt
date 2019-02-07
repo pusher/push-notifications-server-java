@@ -96,4 +96,18 @@ class PushNotificationsTest {
 
         assertThat(publishId, `is`(notNullValue()))
     }
+
+    // deleteUser
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `deleteUser should throw an exception if the user id is too long`() {
+        val longUserId = String(ByteArray(200))
+        beams.deleteUser(longUserId)
+    }
+
+    @Test
+    fun `deleteUser should not return errors if the user id is valid`() {
+        beams.deleteUser("java-user")
+        // no exceptions --> great
+    }
 }

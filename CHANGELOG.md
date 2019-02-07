@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
  - Support for [Authenticated Users](https://docs.pusher.com/beams/concepts/authenticated-users):
- `generateToken` and `publishToUsers` functions were added
+ `generateToken`, `publishToUsers` and `deleteUser` functions were added
 
 ### Changed
  - Renamed `publish` method to `publishToInterest`

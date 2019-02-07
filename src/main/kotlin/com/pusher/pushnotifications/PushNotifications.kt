@@ -3,12 +3,14 @@ package com.pusher.pushnotifications
 import com.google.gson.Gson
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import org.apache.http.client.methods.HttpDelete
 import java.io.IOException
 import java.net.URISyntaxException
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
+import java.net.URLEncoder
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -38,7 +40,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
     private val maxRequestInterestsAllowed = 100
     private val userIdMaxLength = 164
     private val maxRequestUsersAllowed = 1000
-    private val baseURL = "https://$instanceId.pushnotifications.pusher.com/publish_api/v1"
+    private val baseURL = "https://$instanceId.pushnotifications.pusher.com"
 
     init {
         if (instanceId.isEmpty()) {
@@ -114,7 +116,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         publishRequestWithInterests.put("interests", interests)
 
         val client = HttpClients.createDefault()
-        val httpPost = HttpPost("$baseURL/instances/$instanceId/publishes/interests")
+        val httpPost = HttpPost("$baseURL/publish_api/v1/instances/$instanceId/publishes/interests")
         httpPost.setEntity(StringEntity(gson.toJson(publishRequestWithInterests)))
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-Type", "application/json")
@@ -160,7 +162,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         publishRequestWithUsers.put("users", users)
 
         val client = HttpClients.createDefault()
-        val httpPost = HttpPost("$baseURL/instances/$instanceId/publishes/users")
+        val httpPost = HttpPost("$baseURL/publish_api/v1/instances/$instanceId/publishes/users")
         httpPost.setEntity(StringEntity(gson.toJson(publishRequestWithUsers)))
         httpPost.setHeader("Accept", "application/json")
         httpPost.setHeader("Content-Type", "application/json")
@@ -177,6 +179,40 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
             in 500..599 -> throw PusherServerError(extractErrorDescription(responseBody))
             else -> {
                 return gson.fromJson(responseBody, PublishNotificationResponse::class.java).publishId
+            }
+        }
+    }
+
+    /**
+     * Remove the user with the given ID (and all of their devices) from the Pusher Beams database.
+     * The user will no longer receive any notifications. This action cannot be undone.
+     *
+     * @param userId id of the user to be deleted
+     */
+    fun deleteUser(userId: String) {
+        if (userId.length > userIdMaxLength) {
+            throw IllegalArgumentException(
+                    "User id ($userId) is too long (expected less than ${userIdMaxLength + 1}, got ${userId.length})")
+        }
+
+        val userIdURLEncoded = URLEncoder.encode(userId, "UTF-8")
+
+        val httpDelete = HttpDelete("$baseURL/customer_api/v1/instances/$instanceId/users/$userIdURLEncoded")
+        httpDelete.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
+
+        val client = HttpClients.createDefault()
+        val response = client.execute(httpDelete)
+        val responseBody = EntityUtils.toString(response.entity, "UTF-8")
+        val statusCode = response.statusLine.statusCode
+
+        when (statusCode) {
+            401 -> throw PusherAuthError(extractErrorDescription(responseBody))
+            404 -> throw PusherMissingInstanceError(extractErrorDescription(responseBody))
+            429 -> throw PusherTooManyRequestsError(extractErrorDescription(responseBody))
+            in 400..499 -> throw PusherValidationError(extractErrorDescription(responseBody))
+            in 500..599 -> throw PusherServerError(extractErrorDescription(responseBody))
+            else -> {
+                return // great
             }
         }
     }
