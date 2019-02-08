@@ -14,6 +14,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 import com.auth0.jwt.JWT
+import org.apache.http.client.methods.HttpRequestBase
 
 class PusherAuthError(val errorMessage: String): RuntimeException()
 class PusherTooManyRequestsError(val errorMessage: String): RuntimeException()
@@ -34,6 +35,7 @@ data class PushNotificationErrorResponse(val error: String, val description: Str
  * @param secretKey the secret key for the instance
  */
 class PushNotifications(private val instanceId: String, private val secretKey: String) {
+    private val sdkVersion = "1.0.0"
     private val gson = Gson()
     private val interestNameMaxLength = 164
     private val maxRequestInterestsAllowed = 100
@@ -76,7 +78,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
     }
 
     /**
-     * Publish the given publish_body to the specified interests.
+     * Publish the given `publishRequest` to the specified interests.
      *
      * @param  interests List of interests that the publish body should be sent to.
      * @param  publishRequest Map containing the body of the push notification publish request.
@@ -90,7 +92,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
     }
 
     /**
-     * Publish the given publish_body to the specified interests.
+     * Publish the given `publishRequest` to the specified interests.
      *
      * @param  interests List of interests that the publish body should be sent to.
      * @param  publishRequest Map containing the body of the push notification publish request.
@@ -113,30 +115,22 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         val publishRequestWithInterests = publishRequest.toMutableMap()
         publishRequestWithInterests.put("interests", interests)
 
-        val client = HttpClients.createDefault()
         val httpPost = HttpPost("$baseURL/publish_api/v1/instances/$instanceId/publishes/interests")
-        httpPost.setEntity(StringEntity(gson.toJson(publishRequestWithInterests)))
-        httpPost.setHeader("Accept", "application/json")
+        addRequestHeaders(httpPost)
         httpPost.setHeader("Content-Type", "application/json")
-        httpPost.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
-        val response = client.execute(httpPost)
+        httpPost.entity = StringEntity(gson.toJson(publishRequestWithInterests))
+
+        val response = HttpClients.createDefault().execute(httpPost)
         val responseBody = EntityUtils.toString(response.entity, "UTF-8")
         val statusCode = response.statusLine.statusCode
 
-        when (statusCode) {
-            401 -> throw PusherAuthError(extractErrorDescription(responseBody))
-            404 -> throw PusherMissingInstanceError(extractErrorDescription(responseBody))
-            429 -> throw PusherTooManyRequestsError(extractErrorDescription(responseBody))
-            in 400..499 -> throw PusherValidationError(extractErrorDescription(responseBody))
-            in 500..599 -> throw PusherServerError(extractErrorDescription(responseBody))
-            else -> {
-               return gson.fromJson(responseBody, PublishNotificationResponse::class.java).publishId
-            }
-        }
+        checkForServerErrors(statusCode, responseBody)
+
+        return gson.fromJson(responseBody, PublishNotificationResponse::class.java).publishId
     }
 
     /**
-     * Publish the given publish_body to the specified users.
+     * Publish the given `publishRequest` to the specified users.
      *
      * @param  users List of user ids that the publish body should be sent to.
      * @param  publishRequest Map containing the body of the push notification publish request.
@@ -159,26 +153,18 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         val publishRequestWithUsers = publishRequest.toMutableMap()
         publishRequestWithUsers.put("users", users)
 
-        val client = HttpClients.createDefault()
         val httpPost = HttpPost("$baseURL/publish_api/v1/instances/$instanceId/publishes/users")
-        httpPost.setEntity(StringEntity(gson.toJson(publishRequestWithUsers)))
-        httpPost.setHeader("Accept", "application/json")
+        addRequestHeaders(httpPost)
         httpPost.setHeader("Content-Type", "application/json")
-        httpPost.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
-        val response = client.execute(httpPost)
+        httpPost.entity = StringEntity(gson.toJson(publishRequestWithUsers))
+
+        val response = HttpClients.createDefault().execute(httpPost)
         val responseBody = EntityUtils.toString(response.entity, "UTF-8")
         val statusCode = response.statusLine.statusCode
 
-        when (statusCode) {
-            401 -> throw PusherAuthError(extractErrorDescription(responseBody))
-            404 -> throw PusherMissingInstanceError(extractErrorDescription(responseBody))
-            429 -> throw PusherTooManyRequestsError(extractErrorDescription(responseBody))
-            in 400..499 -> throw PusherValidationError(extractErrorDescription(responseBody))
-            in 500..599 -> throw PusherServerError(extractErrorDescription(responseBody))
-            else -> {
-                return gson.fromJson(responseBody, PublishNotificationResponse::class.java).publishId
-            }
-        }
+        checkForServerErrors(statusCode, responseBody)
+
+        return gson.fromJson(responseBody, PublishNotificationResponse::class.java).publishId
     }
 
     /**
@@ -196,14 +182,23 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         val userIdURLEncoded = URLEncoder.encode(userId, "UTF-8")
 
         val httpDelete = HttpDelete("$baseURL/customer_api/v1/instances/$instanceId/users/$userIdURLEncoded")
-        httpDelete.setHeader("Authorization", String.format("Bearer %s", this.secretKey))
+        addRequestHeaders(httpDelete)
 
-        val client = HttpClients.createDefault()
-        val response = client.execute(httpDelete)
+        val response = HttpClients.createDefault().execute(httpDelete)
         val responseBody = EntityUtils.toString(response.entity, "UTF-8")
         val statusCode = response.statusLine.statusCode
 
-        when (statusCode) {
+        checkForServerErrors(statusCode, responseBody)
+    }
+
+    private fun addRequestHeaders(request: HttpRequestBase) {
+        request.setHeader("Accept", "application/json")
+        request.setHeader("Authorization", "Bearer ${this.secretKey}")
+        request.setHeader("X-Pusher-Library", "pusher-push-notifications-server-java $sdkVersion")
+    }
+
+    private fun checkForServerErrors(responseStatusCode: Int, responseBody: String) {
+        when (responseStatusCode) {
             401 -> throw PusherAuthError(extractErrorDescription(responseBody))
             404 -> throw PusherMissingInstanceError(extractErrorDescription(responseBody))
             429 -> throw PusherTooManyRequestsError(extractErrorDescription(responseBody))
