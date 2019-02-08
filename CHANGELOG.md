@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [[1.1.0]](https://github.com/pusher/push-notifications-server-java/compare/1.0.0...1.1.0) - 2019-02-08
+
 ### Added
  - Support for [Authenticated Users](https://docs.pusher.com/beams/concepts/authenticated-users):
  `generateToken`, `publishToUsers` and `deleteUser` functions were added
@@ -13,7 +15,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Renamed `publish` method to `publishToInterest`
 
-
-## [1.0.0] - 2018-07-31
+## [[1.0.0]](https://github.com/pusher/push-notifications-server-java/compare/1e266803c18a0a3feb4ccac6437b7fc2e3a28efd...HEAD) - 2018-07-31
 ### Added
  - Changelog for GA release

@@ -29,13 +29,13 @@ data class PushNotificationErrorResponse(val error: String, val description: Str
  * that is used to publish push notifications to specified interests.
  *
  * @author www.pusher.com
- * @version 1.0.0
+ * @version 1.1.0
  *
  * @param instanceId the id of the instance
  * @param secretKey the secret key for the instance
  */
 class PushNotifications(private val instanceId: String, private val secretKey: String) {
-    private val sdkVersion = "1.0.0"
+    private val sdkVersion = "1.1.0"
     private val gson = Gson()
     private val interestNameMaxLength = 164
     private val maxRequestInterestsAllowed = 100

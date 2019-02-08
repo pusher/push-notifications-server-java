@@ -15,7 +15,7 @@ The push-notifications-server-java is available in Maven Central.
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>push-notifications-server-java</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -24,7 +24,7 @@ The push-notifications-server-java is available in Maven Central.
 
 ```groovy
 dependencies {
-  compile 'com.pusher:push-notifications-server-java:1.0.0'
+  compile 'com.pusher:push-notifications-server-java:1.1.0'
 }
 ```
 
