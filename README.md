@@ -85,7 +85,7 @@ Map<String, Map> fcm = new HashMap();
 fcm.put("notification", fcmNotification);
 publishRequest.put("fcm", fcm);
 
-pushNotifications.publish(interests, publishRequest);
+pushNotifications.publishToInterests(interests, publishRequest);
 ```
 
 </p>
@@ -101,7 +101,7 @@ val publishRequest = hashMapOf(
   "fcm" to hashMapOf("notification" to hashMapOf("title" to "hello", "body" to "Hello world"))
 )
 
-pn.publish(interests, publishRequest)
+pn.publishToInterests(interests, publishRequest)
 ```
 
 </p>
