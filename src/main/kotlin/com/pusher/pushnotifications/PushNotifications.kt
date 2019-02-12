@@ -118,7 +118,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         val httpPost = HttpPost("$baseURL/publish_api/v1/instances/$instanceId/publishes/interests")
         addRequestHeaders(httpPost)
         httpPost.setHeader("Content-Type", "application/json")
-        httpPost.entity = StringEntity(gson.toJson(publishRequestWithInterests))
+        httpPost.entity = StringEntity(gson.toJson(publishRequestWithInterests), "UTF-8")
 
         val response = HttpClients.createDefault().execute(httpPost)
         val responseBody = EntityUtils.toString(response.entity, "UTF-8")
@@ -156,7 +156,7 @@ class PushNotifications(private val instanceId: String, private val secretKey: S
         val httpPost = HttpPost("$baseURL/publish_api/v1/instances/$instanceId/publishes/users")
         addRequestHeaders(httpPost)
         httpPost.setHeader("Content-Type", "application/json")
-        httpPost.entity = StringEntity(gson.toJson(publishRequestWithUsers))
+        httpPost.entity = StringEntity(gson.toJson(publishRequestWithUsers), "UTF-8")
 
         val response = HttpClients.createDefault().execute(httpPost)
         val responseBody = EntityUtils.toString(response.entity, "UTF-8")
