@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [[1.1.1]](https://github.com/pusher/push-notifications-server-java/compare/1.1.0...1.1.1) - 2019-02-12
+
 ### Fixed
  - Force UTF-8 encoding for publish requests to fix issues with non-latin characters.
 
